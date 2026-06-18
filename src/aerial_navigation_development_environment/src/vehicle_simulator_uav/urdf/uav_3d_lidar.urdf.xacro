@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot name="uav_3d_lidar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="uav_lidar">
+    <inertial>
+      <mass value="0.10"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0002" ixy="0.0" ixz="0.0"
+               iyy="0.0002" iyz="0.0"
+               izz="0.0002"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.05"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="uav_lidar">
+    <sensor type="ray" name="uav_3d_lidar">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+
+      <ray>
+        <scan>
+          <horizontal>
+            <!-- Forward 120 degrees: -60 deg to +60 deg -->
+            <samples>241</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14</min_angle>
+            <max_angle>3.145</max_angle>
+          </horizontal>
+
+          <vertical>
+            <!-- Vertical 30 degrees: -15 deg to +15 deg -->
+            <samples>16</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.08726646</min_angle>
+            <max_angle>0.26179939</max_angle>
+          </vertical>
+        </scan>
+
+        <range>
+          <min>0.15</min>
+          <max>8.0</max>
+          <resolution>0.02</resolution>
+        </range>
+
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+
+      <plugin name="uav_3d_lidar_controller" filename="libgazebo_ros_velodyne_laser.so">
+        <topicName>/uav/lidar/points</topicName>
+        <frameName>uav_lidar</frameName>
+        <min_range>0.15</min_range>
+        <max_range>8.0</max_range>
+        <gaussianNoise>0.01</gaussianNoise>
+        <organize_cloud>false</organize_cloud>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

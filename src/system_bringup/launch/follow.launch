@@ -1,0 +1,47 @@
+<launch>
+
+  <node pkg="system_bringup" type="follow_node"
+        name="ollow_node" output="screen">
+
+    <param name="ugv_odom_topic" value="/ugv/state_estimation" />
+    <param name="uav_odom_topic" value="/uav/state_estimation" />
+    <param name="uav_goal_topic" value="/uav/way_point" />
+    <param name="uav_speed_topic" value="/uav/speed" />
+    <param name="history_path_topic" value="/airground/ugv_history_path" />
+
+    <param name="goal_frame" value="map" />
+
+    <param name="follow_mode" value="direct" />
+    <param name="follow_height" value="1.5" />
+    <param name="follow_x_lag" value="0.0" />
+    <param name="follow_y_lag" value="0.0" />
+    <param name="lookahead_distance" value="2.0" />
+    <param name="direct_follow_offset" value="2.0" />
+    <param name="direct_follow_offset_mode" value="motion" />
+    <param name="publish_speed" value="true" />
+    <param name="follow_speed_stop_distance" value="0.8" />
+    <param name="follow_speed_slow_distance" value="4.0" />
+    <param name="follow_speed_max_ratio" value="0.5" />
+    <param name="follow_speed_ahead_max_ratio" value="0.2" />
+    <param name="follow_speed_ahead_tolerance" value="0.4" />
+    <param name="min_record_distance" value="0.2" />
+    <param name="max_history_size" value="1000" />
+
+    <param name="publish_rate" value="10.0" />
+
+    <param name="use_ugv_z_as_base" value="false" />
+
+    <param name="ugv_timeout" value="1.0" />
+    <param name="uav_timeout" value="1.0" />
+
+    <param name="limit_index_jump" value="true" />
+    <param name="max_anchor_advance_points" value="80" />
+    <param name="search_back_points" value="20" />
+
+    <param name="max_goal_jump" value="5.0" />
+    <param name="reset_history_on_reverse" value="true" />
+    <param name="reverse_dot_threshold" value="-0.9" />
+
+  </node>
+
+</launch>

@@ -1,0 +1,166 @@
+<launch>
+  
+  <arg name="world_name" default="$(find vehicle_simulator_uav)/world/forest.world" />
+  <arg name="explore_world" default="forest" />
+
+  <arg name="uav_x" default="0.0" />
+  <arg name="uav_y" default="0.0" />
+  <arg name="uav_z" default="2.0" />
+  <arg name="uav_yaw" default="0.0" />
+  <arg name="uav_robot_model_name" default="uav_robot" />
+  <arg name="uav_rgbd_camera_model_name" default="uav_rgbd_camera" />
+  <arg name="uav_lidar_model_name" default="uav_lidar" />
+
+  <arg name="ugv_x" default="3.0" />
+  <arg name="ugv_y" default="0.0" />
+  <arg name="ugv_z" default="0.0" />
+  <arg name="ugv_yaw" default="0.0" />
+  <arg name="ugv_robot_model_name" default="ugv_robot" />
+  <arg name="ugv_lidar_model_name" default="ugv_lidar" />
+  <arg name="ugv_camera_model_name" default="ugv_camera" />
+
+  <param name="/use_sim_time" value="true" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)" />
+    <arg name="paused" value="false" />
+    <arg name="use_sim_time" value="true" />
+    <arg name="gui" value="true" />
+    <arg name="headless" value="false" />
+    <arg name="debug" value="false" />
+  </include>
+
+  <!-- START UAV SIMULATION -->
+  <param name="/uav/robot_description"
+         command="$(find xacro)/xacro --inorder '$(find vehicle_simulator_uav)/urdf/robot.urdf.xacro'" />
+      
+  <param name="/uav/lidar_description"
+       command="$(find xacro)/xacro '$(find vehicle_simulator_uav)/urdf/uav_3d_lidar.urdf.xacro'" />
+
+  <param name="/uav/rgbd_camera_description"
+         command="$(find xacro)/xacro --inorder '$(find vehicle_simulator_uav)/urdf/rgbd_camera.urdf.xacro'" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_uav"
+        launch-prefix="bash -c 'sleep 1; exec $0 $@'"
+        args="-urdf -param /uav/robot_description -model $(arg uav_robot_model_name)
+              -x $(arg uav_x) -y $(arg uav_y) -z $(arg uav_z) -Y $(arg uav_yaw)"
+        output="screen" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_uav_lidar"
+      launch-prefix="bash -c 'sleep 3; exec $0 $@'"
+      args="-urdf -param /uav/lidar_description -model $(arg uav_lidar_model_name)
+            -x $(arg uav_x) -y $(arg uav_y) -z $(arg uav_z) -Y $(arg uav_yaw)"
+      output="screen" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_uav_rgbd_camera"
+        launch-prefix="bash -c 'sleep 5; exec $0 $@'"
+        args="-urdf -param /uav/rgbd_camera_description -model $(arg uav_rgbd_camera_model_name)
+              -x $(arg uav_x) -y $(arg uav_y) -z $(arg uav_z) -Y $(arg uav_yaw)"
+        output="screen" />
+
+  <!-- START UGV SIMULATION -->
+  <param name="/ugv/robot_description"
+         command="$(find xacro)/xacro --inorder '$(find vehicle_simulator)/urdf/robot.urdf.xacro'" />
+
+  <param name="/ugv/lidar_description"
+         command="$(find xacro)/xacro --inorder '$(find vehicle_simulator)/urdf/lidar.urdf.xacro'" />
+
+  <param name="/ugv/camera_description"
+         command="$(find xacro)/xacro --inorder '$(find vehicle_simulator)/urdf/camera.urdf.xacro'" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_ugv"
+        launch-prefix="bash -c 'sleep 7; exec $0 $@'"
+        args="-urdf -param /ugv/robot_description -model $(arg ugv_robot_model_name)
+              -x $(arg ugv_x) -y $(arg ugv_y) -z $(arg ugv_z) -Y $(arg ugv_yaw)"
+        output="screen" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_ugv_lidar"
+        launch-prefix="bash -c 'sleep 9; exec $0 $@'"
+        args="-urdf -param /ugv/lidar_description -model $(arg ugv_lidar_model_name)
+              -x $(arg ugv_x) -y $(arg ugv_y) -z $(arg ugv_z) -Y $(arg ugv_yaw)"
+        output="screen" />
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_ugv_camera"
+        launch-prefix="bash -c 'sleep 11; exec $0 $@'"
+        args="-urdf -param /ugv/camera_description -model $(arg ugv_camera_model_name)
+              -x $(arg ugv_x) -y $(arg ugv_y) -z $(arg ugv_z) -Y $(arg ugv_yaw)"
+        output="screen" />
+
+
+  <!-- START UAV LOCAL PLANNER -->
+  <include file="$(find local_planner_uav)/launch/local_planner_outdoor.launch">
+    <arg name="autonomyMode" value="true" />
+    <arg name="stateEstimationTopic" value="/uav/state_estimation" />
+    <arg name="CloudTopic" value="/uav/lidar/points" />
+    <arg name="depthCloudDelay" value="0" />
+    <arg name="depthCamPitchOffset" value="0" />
+    <arg name="depthCamXOffset" value="0" />
+    <arg name="depthCamYOffset" value="0" />
+    <arg name="depthCamZOffset" value="0" />
+    <arg name="trackingCamBackward" value="false" />
+    <arg name="trackingCamXOffset" value="0" />
+    <arg name="trackingCamYOffset" value="0" />
+    <arg name="trackingCamZOffset" value="0" />
+    <arg name="trackingCamScale" value="1.0" />
+  </include>
+
+  <node pkg="vehicle_simulator_uav" type="vehicleSimulator_uav"
+        name="uav_vehicleSimulator" output="screen" launch-prefix="bash -c 'sleep 13; exec $0 $@'">
+        
+    <param name="vehicleX" value="$(arg uav_x)" />
+    <param name="vehicleY" value="$(arg uav_y)" />
+    <param name="vehicleZ" value="$(arg uav_z)" />
+    <param name="vehicleYaw" value="$(arg uav_yaw)" />
+    <param name="sensorPitch" value="0" />
+    <param name="realtimeFactor" value="1.0" />
+    <param name="robotModelName" value="$(arg uav_robot_model_name)" />
+    <param name="lidarModelName" value="$(arg uav_lidar_model_name)" />
+    <param name="rgbdCameraModelName" value="$(arg uav_rgbd_camera_model_name)" />
+  </node>
+
+  <!-- START UAV TRANSFORM PUBLISHER -->
+  <node pkg="tf" type="static_transform_publisher"
+      name="uav_rgbd_camera_tf"
+      args="0 0 0 0 0 0 uav_vehicle uav_rgbd_camera 100" />
+
+  <node pkg="tf" type="static_transform_publisher"
+      name="uav_lidar_tf"
+      args="0 0 0 0 0 0 uav_vehicle uav_lidar 100" />
+
+  <!-- START UGV SIMULATION -->
+  <node pkg="vehicle_simulator" type="vehicleSimulator"
+        name="ugv_vehicleSimulator" output="screen" launch-prefix="bash -c 'sleep 13; exec $0 $@'">
+    <param name="vehicleX" value="$(arg ugv_x)" />
+    <param name="vehicleY" value="$(arg ugv_y)" />
+    <param name="vehicleZ" value="$(arg ugv_z)" />
+    <param name="vehicleYaw" value="$(arg ugv_yaw)" />
+    <param name="sensorPitch" value="0" />
+    <param name="realtimeFactor" value="1.0" />
+    <param name="robotModelName" value="$(arg ugv_robot_model_name)" />
+    <param name="lidarModelName" value="$(arg ugv_lidar_model_name)" />
+    <param name="cameraModelName" value="$(arg ugv_camera_model_name)" />
+  </node>
+
+  <node pkg="sensor_scan_generation" type="sensorScanGeneration"
+        name="ugv_sensorScanGeneration" output="screen" />
+
+  <node pkg="terrain_analysis" type="terrainAnalysis"
+        name="ugv_terrainAnalysis" output="screen" />
+
+  <node pkg="terrain_analysis_ext" type="terrainAnalysisExt"
+        name="ugv_terrainAnalysisExt" output="screen" />
+
+  <include file="$(find local_planner)/launch/local_planner.launch">
+    <arg name="autonomyMode" value="true" />
+  </include>
+
+  <!-- START RViz -->
+  <node launch-prefix="nice" pkg="rviz" type="rviz" name="rvizGA" args="-d $(find vehicle_simulator)/rviz/vehicle_simulator.rviz" respawn="true"/>
+  <!-- <node launch-prefix="nice" pkg="rviz" type="rviz" name="rvizAA" args="-d $(find vehicle_simulator_uav)/rviz/vehicle_simulator_gazebo.rviz" respawn="true"/> -->
+
+  <include file="$(find system_bringup)/launch/follow.launch"/>
+
+  <include file="$(find tare_planner)/launch/explore_$(arg explore_world).launch">
+  </include>
+
+</launch>
